@@ -4,29 +4,15 @@ library("ICSNP")
 library("aplpack")
 library("graphics")
 library("ggplot2")
-library("fastqn")
+library("robcor")
 
 M_1_SQRT2 <- 1 / sqrt(2)
 
-CC <- 1.483
-Cd <- 1#2.2219
-
-#FQn calculation
-# FQn <- function(x) {
-#  mu <- median(x)
-#  sigma <- mad(x, center=mu)
-#  u2 <- ((x - mu) / sigma) ^ 2
-#  e <- exp(-0.5 * u2)
-#  n <- length(x)
-#  z <- colSums(outer(u2, c(0, 1), "^") * e)
-#  sigma <- CC * sigma * (1 - (z[1] - n * M_1_SQRT2) / z[2])
-#  return(sigma)
-# }
-
+## Calculate correlation coefficient through FQn estimates
 CorrFQn<-function(x, y)
 {
-  FQnX <- FQn(x)
-  FQnY <- FQn(y)
+  FQnX <- fqn(x)
+  FQnY <- fqn(y)
   
   u<-(x/FQnX+y/FQnY) * M_1_SQRT2
   v<-(x/FQnX-y/FQnY) * M_1_SQRT2
@@ -42,8 +28,7 @@ CorrFQn<-function(x, y)
   return(list(Corr = corr, VarX=FQnX, VarY=FQnY))
 }
 
-## choose location estimator
-
+## Estimate location using different estimates
 EstimateLocation <- function(x, y, estimatorType="CompMedian"){
   require(pcaPP)
   require(ICSNP)
@@ -74,16 +59,15 @@ EstimateLocation <- function(x, y, estimatorType="CompMedian"){
 	    c(mean(x), mean(y))
 }
 
-## choose scale estimator
-
+## Estimate scale in 2 dimensions
 EstimateScale <- function(x, y, estimatorType="Qn"){
   if(estimatorType == "Qn")
     c(FQn(x), FQn(y))
 }
 
-## estimate distance by a predefined measure
-
+## estimate distance using Mahalanobis distance
 EstimateDistance <- function(from, to, CovMatr, estimatorType="Mahalanobis"){
+  # TODO
   if(estimatorType == "Mahalanobis"){
     sqrt(mahalanobis(from, to, CovMatr))
     ##mahalanobis(from, to, CovMat$cov)
@@ -92,6 +76,7 @@ EstimateDistance <- function(from, to, CovMatr, estimatorType="Mahalanobis"){
     sqrt(mahalanobis(from, to, diag(ncol(from))))
   }
 
+## Build covariation matrix
 EstimateCovMatr<-function(x, y, center)
 {
   rroFQn <- CorrFQn(x-center[1], y-center[2])
@@ -112,7 +97,7 @@ GetHalfPointsFromCenterLocation <- function(x, y, center){
   sortres$ix[1:(length(sortres$ix)%/%2)]
   }
   
-  ## calculate fence points - returns logic vector
+## calculate fence points - returns logic vector
 GetFencePoints <- function(x, y, center, scaleX, scaleY, alphaF=1.0, whichInds, type="ellipse"){
   ##dists <- EstimateDistance(c(x, y), center)
   inds<- ! (1:length(x) %in% whichInds)
@@ -154,8 +139,7 @@ GetFencePoints <- function(x, y, center, scaleX, scaleY, alphaF=1.0, whichInds, 
   (abs(x - center[1]) < 5*scaleX*alpha) & (abs(y - center[2]) < 5*scaleY*alpha)
 }
   
-  ## build boxplot
-
+## build boxplot
 BuildBoxplot <- function(x, y, alpha=1.5, verbose = FALSE){
   require(MASS)
   ## converting vectors x, y to a matrix
