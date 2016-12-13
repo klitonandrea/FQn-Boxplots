@@ -401,11 +401,7 @@ PlotBoxplot <- function(box, scatterPlot=TRUE, add=FALSE)
 	
 }
 
-MLREstimate<-function(x, mu1, sigma1, rro1, mu2, sigma2, rro2){
-  log((sigma2[1,1]*sigma2[1,2]*sqrt(1-rro2*rro2))/(sigma1[1,1]*sigma1[1,2]*sqrt(1-rro1*rro1))) +
-  ((x[1,1]-mu2[1,1])*(x[1,1]-mu2[1,1])/(sigma2[1,1]*sigma2[1,1]) - 2*rro2*(x[1,1]-mu2[1,1])*(x[1,2]-mu2[1,2])/(sigma2[1,1]*sigma2[1,2])+(x[1,2]-mu2[1,2])*(x[1,2]-mu2[1,2])/(sigma2[1,2]*sigma2[1,2]))-
-  ((x[1,1]-mu1[1,1])*(x[1,1]-mu1[1,1])/(sigma1[1,1]*sigma1[1,1]) - 2*rro1*(x[1,1]-mu1[1,1])*(x[1,2]-mu1[1,2])/(sigma1[1,1]*sigma1[1,2])+(x[1,2]-mu1[1,2])*(x[1,2]-mu1[1,2])/(sigma1[1,2]*sigma1[1,2]))
-}
+
 
 Bagplot<-function(sig, alpha = 2.7){ 
 #   signalX<-sig$Signal[, 1]
