@@ -1,4 +1,4 @@
-#library("pcaPP")
+library("pcaPP")
 library("MASS")
 library("ICSNP")
 library("aplpack")
@@ -8,9 +8,18 @@ library("robcor")
 
 M_1_SQRT2 <- 1 / sqrt(2)
 
-## Calculate correlation coefficient through FQn estimates
+#' Correlation function
+#'
+#' Calculate correlation coefficient through FQn estimates
+#' @param x a vector 
+#' @param y a vector
+#' @return correlation coefficient and scale estimates
+#' @export
+#' @example 
+#' CorrFQn(rnorm(50), rnorm(50))
 CorrFQn <- function(x, y)
 {
+  # robcor(x, y)
   FQnX <- fqn(x)
   FQnY <- fqn(y)
   
@@ -28,7 +37,15 @@ CorrFQn <- function(x, y)
   return(list(Corr = corr, VarX = FQnX, VarY = FQnY))
 }
 
-## Estimate location using different estimates
+#' Location estimate function
+#'
+#' Estimate location using different estimates
+#' @param x a vector
+#' @param y a vector
+#' @return pair of values (c1, c2)
+#' @export
+#' @example 
+#' EstimateLocation(rnorm(100), rnorm(100))
 EstimateLocation <- function(x, y, estimatorType="CompMedian"){
   require(pcaPP)
   require(ICSNP)
@@ -59,13 +76,26 @@ EstimateLocation <- function(x, y, estimatorType="CompMedian"){
 	    c(mean(x), mean(y))
 }
 
-## Estimate scale in 2 dimensions
+#' Scale estimate function
+#' 
+#' Estimate scale in 2 dimensions
+#' @param x vector
+#' @param y vector
+#' @param estimatorType 
+#' @return pair of values for x and y respectively
 EstimateScale <- function(x, y, estimatorType="Qn"){
-  if ( estimatorType == "Qn")
+  #if ( estimatorType == "Qn")
     c(fqn(x), fqn(y))
 }
 
-## estimate distance using Mahalanobis distance
+#' Distance function
+#' 
+#' Estimates distances between 2 points given their covariation matrix
+#' @param from a point in multivariate dimension
+#' @param to a point in multivariate dimension
+#' @param CovMatr covariation matrix
+#' @return scalar, the distance between points
+#' @export
 EstimateDistance <- function(from, to, CovMatr, estimatorType="Mahalanobis"){
   # TODO
   if ( estimatorType == "Mahalanobis")
@@ -77,7 +107,14 @@ EstimateDistance <- function(from, to, CovMatr, estimatorType="Mahalanobis"){
       sqrt(mahalanobis(from, to, diag(ncol(from))))
   }
 
-## Build covariation matrix
+#' Create covariation matrix
+#' 
+#' Create covariation matrix given the datapoints and their center
+#' @param x vector of scalars
+#' @param y vector of scalars
+#' @param center 2-dimensional center
+#' @export
+#' @return covariation matrix
 EstimateCovMatr <- function(x, y, center)
 {
   rroFQn <- CorrFQn(x - center[1], y - center[2])
@@ -88,7 +125,11 @@ EstimateCovMatr <- function(x, y, center)
   return(retVal)
 }
 
-## calculate hinge points - returns indices
+#' Calculate hinge
+#' 
+#' @param x the first dimension of the points in 2-dimensional space
+#' @param y the second dimension of the point in 2-dimensional space
+#' @return half of the points closer to the center
 GetHalfPointsFromCenterLocation <- function(x, y, center){
   ##center <- rep(center, times=length(x))
   
@@ -98,7 +139,17 @@ GetHalfPointsFromCenterLocation <- function(x, y, center){
   sortres$ix[1:(length(sortres$ix) %/% 2)]
   }
   
-## calculate fence points - returns logic vector
+#' Calculate fence points
+#' 
+#' Calculate fence points - returns logic vector
+#' @param x
+#' @param y
+#' @param center
+#' @param scaleX
+#' @param scaleY
+#' @param alpha parameter alpha for fence, default 1.0
+#' @param  whichInds vector containing the indices for the points 
+#' @return logical vector indicating which points are in the fence
 GetFencePoints <- function(x, y, center, scaleX, scaleY, alphaF=1.0, whichInds, type="ellipse"){
   ##dists <- EstimateDistance(c(x, y), center)
   inds    <- !(1:length(x) %in% whichInds)
@@ -126,11 +177,18 @@ GetFencePoints <- function(x, y, center, scaleX, scaleY, alphaF=1.0, whichInds, 
     return( rV & inds)
   }
   else
-    (abs(x - center[1]) < 5*scaleX*alpha) & (abs(y - center[2]) < 5*scaleY*alpha)
+    (abs(x - center[1]) < 5*scaleX*alphaF) & (abs(y - center[2]) < 5*scaleY*alphaF)
 }
   
-## build boxplot
-BuildBoxplot <- function(x, y, alpha=1.5, verbose = FALSE){
+#' Calculate FQn boxplot
+#' 
+#' main function to calculate bi-variate boxplot
+#' @param x a numeric vector or matrix
+#' @param y optional numeric vector
+#' @param alpha the fence coefficient
+#' @return a list with boxplot calculated parameters
+#' @export
+FQnBoxplot <- function(x, y, alpha=1.5, verbose = FALSE){
   require(MASS)
   ## converting vectors x, y to a matrix
   dataMatrix <- NA
@@ -216,7 +274,14 @@ BuildBoxplot <- function(x, y, alpha=1.5, verbose = FALSE){
   return(bpret)
   }
 
-plotBPs <- function(bps, names, xLabel = "", yLabel = ""){
+#' Plot a list of bivariate FQn boxplots
+#' 
+#' @param bps list of boxplots
+#' @param names boxplot naming, by default the boxplots will be enumerated
+#' @param xLabel the x label
+#' @param yLabel the y label
+#' @export
+plotBPs <- function(bps, names = c(), xLabel = "", yLabel = ""){
   library("ggplot2")
   N <- length(bps)
   if ( N == 0)
@@ -318,6 +383,11 @@ plotBPs <- function(bps, names, xLabel = "", yLabel = ""){
    (p + facet_wrap(~ BoxplotId, nrow = 1))  + map + scale_fill_hue(name = "Categories", breaks = names) + scale_alpha_continuous(guide = FALSE) #+ opts(legend.position="none") scales="free_x",
 }
 
+#' Plot a bivariate FQn-boxplot
+#' 
+#' @param bp boxplot
+#' @param show.outliers by default set to true
+#' @export
 plot2dBP <- function(bp, show.outliers=TRUE, ordernum=1)
 {
  
@@ -346,6 +416,9 @@ plot2dBP <- function(bp, show.outliers=TRUE, ordernum=1)
     theme(legend.position = "none")
 }
 
+#' Another plotting method
+#' 
+#' @export
 PlotBoxplot <- function(box, scatterPlot=TRUE, add=FALSE)
 {
 	#x1 <- box$Points[,1]
