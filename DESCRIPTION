@@ -4,8 +4,17 @@ Title: Bivariate FQn-boxplot implementation
 Authors@R: c(person("Kliton", "Andrea", role=c("aut", "cre"), email = "kliton.andrea@gmail.com"))
 Author: Kliton Andrea [aut, cre]
 Maintainer: Kliton Andrea <kliton.andrea@gmail.com>
-Depends: R(>= 3.2.3), MASS, ICSNP, aplpack, graphics, ggplot2, robcor
+Depends: R(>= 3.2.3)
+Imports: MASS, ICSNP, aplpack, graphics, ggplot2, robcor
 Description: Bivariate boxplots based on fast robust scale estimates.
 URL: 
 License: GPL-2 | file LICENSE
 RoxygenNote: 5.0.1.9000
+RemoteType: github
+RemoteHost: https://api.github.com
+RemoteRepo: FQn-Boxplots
+RemoteUsername: klitonandrea
+RemoteRef: master
+GithubRepo: FQn-Boxplots
+GithubUsername: klitonandrea
+GithubRef: master
