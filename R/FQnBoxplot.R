@@ -1,4 +1,4 @@
-library("pcaPP")
+#library("pcaPP")
 library("MASS")
 library("ICSNP")
 library("aplpack")
@@ -15,7 +15,7 @@ M_1_SQRT2 <- 1 / sqrt(2)
 #' @param y a vector
 #' @return correlation coefficient and scale estimates
 #' @export
-#' @example 
+#' @examples  
 #' CorrFQn(rnorm(50), rnorm(50))
 CorrFQn <- function(x, y)
 {
@@ -44,7 +44,7 @@ CorrFQn <- function(x, y)
 #' @param y a vector
 #' @return pair of values (c1, c2)
 #' @export
-#' @example 
+#' @examples 
 #' EstimateLocation(rnorm(100), rnorm(100))
 EstimateLocation <- function(x, y, estimatorType="CompMedian"){
   require(pcaPP)

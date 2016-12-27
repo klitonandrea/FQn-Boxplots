@@ -1,4 +1,4 @@
-library("pcaPP")
+
 library("MASS")
 library("ICSNP")
 library("aplpack")
